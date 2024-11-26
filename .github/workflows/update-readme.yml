@@ -1,36 +1,46 @@
-name: Check README parser info
+name: Update README
 
-on: push
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
 
 jobs:
   update-readme:
-    name: Check README parser info
+    name: Update README
     runs-on: ubuntu-latest
-    if: github.ref != 'master'
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
+
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.TOKEN_ID }}
+          private-key: ${{ secrets.TOKEN_PRIVATE_KEY }}
 
       - name: Prepare
-        run: |
-          sudo apt-get update
-          sudo add-apt-repository universe
-          wget https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
-          chmod u+x nvim.appimage
-          mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter/start
-          ln -s $(pwd) ~/.local/share/nvim/site/pack/nvim-treesitter/start
-
-      # inspired by nvim-lspconfigs
-      - name: Check README
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COMMIT_MSG: |
-            [docgen] Update README.md
-            skip-checks: true
+          NVIM_TAG: stable
         run: |
-          git config user.email "actions@github"
-          git config user.name "Github Actions"
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-          ./nvim.appimage --headless -c "luafile ./scripts/update-readme.lua" -c "q" || echo "Needs update"
-          git add README.md
-          # Only commit and push if we have changes
-          git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin HEAD:${GITHUB_REF})
+          bash ./scripts/ci-install.sh
+
+      - name: Check README
+        run: |
+          nvim -l scripts/update-readme.lua || echo 'Needs update'
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          sign-commits: true
+          commit-message: "bot(readme): update"
+          title: Update README
+          body: "[beep boop](https://github.com/peter-evans/create-pull-request)"
+          branch: update-readme-pr
+          base: ${{ github.head_ref }}
+
+      - name: Enable Pull Request Automerge
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: gh pr merge --rebase --auto update-readme-pr

@@ -1,4 +1,7 @@
-(comment) @comment
+; Most primitive nodes
+(shebang) @keyword.directive
+
+(comment) @comment @spell
 
 [
   "("
@@ -10,106 +13,181 @@
 ] @punctuation.bracket
 
 [
-  ":"
-  ":until"
-  "&"
-  "&as"
-  "?"
-] @punctuation.special
+  (nil)
+  (nil_binding)
+] @constant.builtin
 
-(nil) @constant.builtin
-(vararg) @punctuation.special
+[
+  (boolean)
+  (boolean_binding)
+] @boolean
 
-(boolean) @boolean
-(number) @number
+[
+  (number)
+  (number_binding)
+] @number
 
-(string) @string
+[
+  (string)
+  (string_binding)
+] @string
+
+[
+  (symbol)
+  (symbol_binding)
+] @variable
+
+(symbol_option) @keyword.directive
+
 (escape_sequence) @string.escape
 
-(symbol) @variable
-
 (multi_symbol
-   "." @punctuation.delimiter
-   (symbol) @field)
+  "." @punctuation.delimiter
+  member: (symbol_fragment) @variable.member)
+
+(list
+  call: (symbol) @function.call)
+
+(list
+  call: (multi_symbol
+    member: (symbol_fragment) @function.call .))
 
 (multi_symbol_method
-   ":" @punctuation.delimiter
-   (symbol) @method .)
+  ":" @punctuation.delimiter
+  method: (symbol_fragment) @function.method.call)
 
-(list . (symbol) @function)
-(list . (multi_symbol (symbol) @function .))
+(quasi_quote_reader_macro
+  macro: _ @punctuation.special)
 
-((symbol) @variable.builtin
- (#match? @variable.builtin "^[$]"))
+(quote_reader_macro
+  macro: _ @punctuation.special)
 
-(binding) @symbol
+(unquote_reader_macro
+  macro: _ @punctuation.special)
 
-[
-  "fn"
-  "lambda"
-  "hashfn"
-  "#"
-] @keyword.function
+(hashfn_reader_macro
+  macro: _ @keyword.function)
 
-(fn name: [
- (symbol) @function
- (multi_symbol (symbol) @function .)
-])
+(sequence_arguments
+  (symbol_binding) @variable.parameter)
 
-(lambda name: [
- (symbol) @function
- (multi_symbol (symbol) @function .)
-])
+(sequence_arguments
+  (rest_binding
+    rhs: (symbol_binding) @variable.parameter))
 
-[
-  "for"
-  "each"
-] @repeat
-((symbol) @repeat
- (#any-of? @repeat
-  "while"))
+(docstring) @string.documentation
 
-[
-  "match"
-] @conditional
-((symbol) @conditional
- (#any-of? @conditional
-  "if" "when"))
+(fn_form
+  name: [
+    (symbol) @function
+    (multi_symbol
+      member: (symbol_fragment) @function .)
+  ])
 
-[
-  "global"
-  "local"
-  "let"
-  "set"
-  "var"
-  "where"
-  "or"
-] @keyword
+(lambda_form
+  name: [
+    (symbol) @function
+    (multi_symbol
+      member: (symbol_fragment) @function .)
+  ])
+
+; NOTE: The macro name is highlighted as @variable because it
+; gives a nicer contrast instead of everything being the same
+; color. Rust queries use this workaround too for `macro_rules!`.
+(macro_form
+  name: [
+    (symbol) @variable
+    (multi_symbol
+      member: (symbol_fragment) @variable .)
+  ])
+
+((symbol) @variable.parameter
+  (#any-of? @variable.parameter "$" "$..."))
+
+((symbol) @variable.parameter
+  (#lua-match? @variable.parameter "^%$[1-9]$"))
+
+((symbol) @operator
+  (#any-of? @operator
+    ; arithmetic
+    "+" "-" "*" "/" "//" "%" "^"
+    ; comparison
+    ">" "<" ">=" "<=" "=" "~="
+    ; other
+    "#" "." "?." ".."))
+
+((symbol) @keyword.operator
+  (#any-of? @keyword.operator
+    ; comparison
+    "not="
+    ; boolean
+    "and" "or" "not"
+    ; bitwise
+    "lshift" "rshift" "band" "bor" "bxor" "bnot"
+    ; other
+    "length"))
+
+(case_guard
+  call: (_) @keyword.conditional)
+
+(case_guard_or_special
+  call: (_) @keyword.conditional)
+
+((symbol) @keyword.function
+  (#any-of? @keyword.function "fn" "lambda" "λ" "hashfn"))
+
+((symbol) @keyword.repeat
+  (#any-of? @keyword.repeat "for" "each" "while"))
+
+((symbol) @keyword.conditional
+  (#any-of? @keyword.conditional "if" "when" "match" "case" "match-try" "case-try"))
+
 ((symbol) @keyword
- (#any-of? @keyword
-  "comment" "do" "doc" "eval-compiler" "lua" "macros" "quote" "tset" "values"))
+  (#any-of? @keyword
+    "global" "local" "let" "set" "var" "comment" "do" "doc" "eval-compiler" "lua" "macros" "unquote"
+    "quote" "tset" "values" "tail!"))
 
-((symbol) @include
- (#any-of? @include
-  "require" "require-macros" "import-macros" "include"))
+((symbol) @keyword.import
+  (#any-of? @keyword.import "require-macros" "import-macros" "include"))
 
 ((symbol) @function.macro
- (#any-of? @function.macro
-  "->" "->>" "-?>" "-?>>" "?." "accumulate" "collect" "doto" "icollect"
-  "macro" "macrodebug" "partial" "pick-args" "pick-values" "with-open"))
+  (#any-of? @function.macro
+    "collect" "icollect" "fcollect" "accumulate" "faccumulate" "->" "->>" "-?>" "-?>>" "?." "doto"
+    "macro" "macrodebug" "partial" "pick-args" "pick-values" "with-open"))
 
-; Lua builtins
+(case_catch
+  call: (symbol) @keyword)
+
+(import_macros_form
+  imports: (table_binding
+    (table_binding_pair
+      value: (symbol_binding) @function.macro)))
+
+; TODO: Highlight builtin methods (`table.unpack`, etc) as @function.builtin
+([
+  (symbol) @module.builtin
+  (multi_symbol
+    base: (symbol_fragment) @module.builtin)
+]
+  (#any-of? @module.builtin
+    "vim" "_G" "debug" "io" "jit" "math" "os" "package" "string" "table" "utf8"))
+
+([
+  (symbol) @variable.builtin
+  (multi_symbol
+    .
+    (symbol_fragment) @variable.builtin)
+]
+  (#eq? @variable.builtin "arg"))
+
+((symbol) @variable.builtin
+  (#eq? @variable.builtin "..."))
+
 ((symbol) @constant.builtin
- (#any-of? @constant.builtin
-  "arg" "_ENV" "_G" "_VERSION"))
+  (#eq? @constant.builtin "_VERSION"))
 
 ((symbol) @function.builtin
- (#any-of? @function.builtin
-  "assert" "collectgarbage" "dofile" "error" "getmetatable" "ipairs"
-  "load" "loadfile" "next" "pairs" "pcall" "print" "rawequal" "rawget"
-  "rawlen" "rawset" "require" "select" "setmetatable" "tonumber" "tostring"
-  "type" "warn" "xpcall"))
-
-((symbol) @function.builtin
- (#any-of? @function.builtin
-  "loadstring" "module" "setfenv" "unpack"))
+  (#any-of? @function.builtin
+    "assert" "collectgarbage" "dofile" "error" "getmetatable" "ipairs" "load" "loadfile" "next"
+    "pairs" "pcall" "print" "rawequal" "rawget" "rawlen" "rawset" "require" "select" "setmetatable"
+    "tonumber" "tostring" "type" "warn" "xpcall" "module" "setfenv" "loadstring" "unpack"))

@@ -1,178 +1,152 @@
-;; Misc
+; Keywords
+[
+  (directive)
+  (shebang)
+] @keyword.directive
 
 [
-  (line_comment)
-  (block_comment)
-  (nesting_block_comment)
-] @comment
+  (import)
+  (module)
+] @keyword.import
 
 [
-  "(" ")"
-  "[" "]"
-  "{" "}"
-] @punctuation.bracket
-
-[
-  ","
-  ";"
-  "."
-] @punctuation.delimiter
-
-[
-  ".."
-  "$"
-] @punctuation.special
-
-;; Constants
-
-[
-  "__FILE_FULL_PATH__"
-  "__FILE__"
-  "__FUNCTION__"
-  "__LINE__"
-  "__MODULE__"
-  "__PRETTY_FUNCTION__"
-] @constant.macro
-
-(string_literals) @string
-
-; Don't highlight token strings as strings
-(token_string_tokens) @none
-
-(character_literal) @character
-
-(integer_literal) @number
-
-(float_literal) @float
-
-[
-  "true"
-  "false"
-] @boolean
-
-;; Functions
-
-(func_declarator
-  (identifier) @function
-)
-
-[
-  "__traits"
-  "__vector"
-  "assert"
-  "is"
-  "mixin"
-  "pragma"
-  "typeid"
-] @function.builtin
-
-(import_expression
-  "import" @function.builtin
-)
-
-(parameter
-  (var_declarator
-    (identifier) @parameter
-  )
-)
-
-(function_literal
-  (identifier) @parameter
-)
-
-(constructor
-  "this" @constructor
-)
-
-(destructor
-  "this" @constructor
-)
-
-;; Keywords
-
-[
-  "case"
-  "default"
-  "else"
-  "if"
-  "switch"
-] @conditional
-
-[
-  "break"
-  "continue"
-  "do"
-  "for"
-  "foreach"
-  "foreach_reverse"
-  "while"
-] @repeat
-
-[
-  "__gshared"
-  "__parameters"
-  "abstract"
-  "alias"
-  "align"
-  "asm"
-  "auto"
-  "body"
-  "class"
-  "const"
-  "debug"
-  "deprecated"
-  "enum"
-  "export"
-  "extern"
-  "final"
-  "goto"
-  "immutable"
-  "inout"
-  "interface"
-  "invariant"
-  "lazy"
-  "macro"
-  "nothrow"
-  "null"
-  "out"
-  "override"
-  "package"
-  "private"
-  "protected"
-  "public"
-  "pure"
-  "ref"
-  "scope"
-  "shared"
-  "static"
-  "struct"
-  "synchronized"
-  "template"
-  "union"
-  "unittest"
-  "version"
-  "with"
+  (alias)
+  (asm)
+  (class)
+  (delegate)
+  (delete)
+  (enum)
+  (interface)
+  (invariant)
+  (mixin)
+  (pragma)
+  (struct)
+  (template)
+  (union)
+  (unittest)
+  (version)
+  (with)
+  (traits)
+  (vector)
+  (parameters_)
+  (default)
+  (goto)
 ] @keyword
 
-[
-  "delegate"
-  "function"
-] @keyword.function
+(function) @keyword.function
 
-"return" @keyword.return
+(synchronized) @keyword.coroutine
 
 [
-  "cast"
-  "new"
+  (if)
+  (else)
+  (switch)
+  (case)
+  (break)
+] @keyword.conditional
+
+[
+  (do)
+  (for)
+  (foreach)
+  (foreach_reverse)
+  (while)
+  (continue)
+] @keyword.repeat
+
+(return) @keyword.return
+
+[
+  (abstract)
+  (deprecated)
+  (private)
+  (protected)
+  (public)
+  (package)
+  (immutable)
+  (final)
+  (const)
+  (override)
+  (static)
+] @keyword.modifier
+
+[
+  (assert)
+  (try)
+  (catch)
+  (finally)
+  (throw)
+  (nothrow)
+] @keyword.exception
+
+[
+  (cast)
+  (new)
+  (in)
+  (is)
+  (not_in)
+  (not_is)
+  (typeid)
+  (typeof)
 ] @keyword.operator
 
 [
-  "+"
-  "++"
-  "+="
+  (lazy)
+  (align)
+  (extern)
+  (scope)
+  (ref)
+  (pure)
+  (export)
+  (shared)
+  (gshared)
+  (out)
+  (inout)
+] @keyword.modifier
+
+(parameter_attribute
+  (return) @keyword.modifier)
+
+(parameter_attribute
+  (in) @keyword.modifier)
+
+(parameter_attribute
+  (out) @keyword.modifier)
+
+(debug) @keyword.debug
+
+; Operators
+[
+  "/="
+  "/"
+  ".."
+  "&"
+  "&="
+  "&&"
+  "|"
+  "|="
+  "||"
   "-"
-  "--"
   "-="
+  "--"
+  "+"
+  "+="
+  "++"
+  "<"
+  "<="
+  "<<"
+  "<<="
+  ">"
+  ">="
+  ">>="
+  ">>>="
+  ">>"
+  ">>>"
+  "!"
+  "!="
+  "$"
+  "="
+  "=="
   "*"
   "*="
   "%"
@@ -181,84 +155,220 @@
   "^="
   "^^"
   "^^="
-  "/"
-  "/="
-  "|"
-  "|="
-  "||"
   "~"
   "~="
-  "="
-  "=="
-  "=>"
-  "<"
-  "<="
-  "<<"
-  "<<="
-  ">"
-  ">="
-  ">>"
-  ">>="
-  ">>>"
-  ">>>="
-  "!"
-  "!="
-  "&"
-  "&&"
+  "@"
 ] @operator
 
+; Variables
+(identifier) @variable
+
 [
-  "catch"
-  "finally"
-  "throw"
-  "try"
-] @exception
+  "exit"
+  "success"
+  "failure"
+  (this)
+  (super)
+] @variable.builtin
 
-(module_declaration
-  "module" @include
-)
+(linkage_attribute
+  "("
+  _ @variable.builtin
+  ")")
 
-(import_declaration
-  "import" @include
-)
+; Modules
+(module_fqn
+  (identifier) @module)
 
-(type) @type
+; Attributes
+(at_attribute
+  (identifier) @attribute)
 
-(catch_parameter
-  (qualified_identifier) @type
-)
+; Constants
+(enum_member
+  (identifier) @constant)
 
-(var_declarations
-  (qualified_identifier) @type
-)
+(manifest_declarator
+  .
+  (identifier) @constant)
 
-(func_declaration
-  (qualified_identifier) @type
-)
+; Members
+(aggregate_body
+  (variable_declaration
+    (declarator
+      (identifier) @variable.member)))
 
-(parameter
-  (qualified_identifier) @type
-)
+(property_expression
+  "."
+  (identifier) @variable.member)
 
+(type
+  "."
+  (identifier) @variable.member)
+
+; Types
 (class_declaration
-  (identifier) @type
-)
+  (class)
+  .
+  (identifier) @type)
 
-(fundamental_type) @type.builtin
+(struct_declaration
+  (struct)
+  .
+  (identifier) @type)
+
+(union_declaration
+  (union)
+  .
+  (identifier) @type)
+
+(enum_declaration
+  (enum)
+  .
+  (identifier) @type)
+
+(alias_declaration
+  (alias)
+  .
+  (identifier) @type)
+
+((identifier) @type
+  (#lua-match? @type "^[A-Z].*"))
+
+(type
+  .
+  (identifier) @type .)
 
 [
-  (module_name)
-  (module_fully_qualified_name)
-] @namespace
+  (auto)
+  (void)
+  (bool)
+  (byte)
+  (ubyte)
+  (char)
+  (short)
+  (ushort)
+  (wchar)
+  (dchar)
+  (int)
+  (uint)
+  (long)
+  (ulong)
+  (real)
+  (double)
+  (float)
+  (cent)
+  (ucent)
+  (ireal)
+  (idouble)
+  (ifloat)
+  (creal)
+  (double)
+  (cfloat)
+] @type.builtin
 
-(at_attribute) @attribute
+; Functions
+(function_declaration
+  (identifier) @function)
 
-(user_defined_attribute
-  "@" @attribute
-)
+(call_expression
+  (identifier) @function)
 
-;; Variables
+(call_expression
+  (type
+    (identifier) @function .))
 
-(primary_expression
-  "this" @variable.builtin
-)
+(call_expression
+  (property_expression
+    (call_expression)
+    (identifier) @function .))
+
+; Parameters
+(parameter
+  (_)
+  (identifier) @variable.parameter)
+
+(function_literal
+  "("
+  (type
+    (identifier) @variable.parameter))
+
+; Constructors
+(constructor
+  (this) @constructor)
+
+(destructor
+  (this) @constructor)
+
+(postblit
+  .
+  (this) @constructor)
+
+; Punctuation
+[
+  ";"
+  "."
+  ":"
+  ","
+  "=>"
+] @punctuation.delimiter
+
+[
+  "("
+  ")"
+  "["
+  "]"
+  "{"
+  "}"
+] @punctuation.bracket
+
+"..." @punctuation.special
+
+; Ternaries
+(ternary_expression
+  [
+    "?"
+    ":"
+  ] @keyword.conditional.ternary)
+
+; Labels
+(label
+  (identifier) @label)
+
+(goto_statement
+  (identifier) @label)
+
+; Literals
+(string_literal) @string
+
+[
+  (int_literal)
+  (float_literal)
+] @number
+
+(char_literal) @character
+
+[
+  (true)
+  (false)
+] @boolean
+
+[
+  (null)
+  (special_keyword)
+] @constant.builtin
+
+; Comments
+(comment) @comment @spell
+
+((comment) @comment.documentation
+  (#lua-match? @comment.documentation "^///[^/]"))
+
+((comment) @comment.documentation
+  (#lua-match? @comment.documentation "^///$"))
+
+((comment) @comment.documentation
+  (#lua-match? @comment.documentation "^/[*][*][^*].*[*]/$"))
+
+((comment) @comment.documentation
+  (#lua-match? @comment.documentation "^/[+][+][^+].*[+]/$"))

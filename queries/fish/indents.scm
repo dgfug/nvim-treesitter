@@ -1,16 +1,18 @@
 [
- (function_definition)
- (while_statement)
- (for_statement)
- (if_statement)
- (begin_statement)
- (switch_statement)
-] @indent
+  (function_definition)
+  (while_statement)
+  (for_statement)
+  (if_statement)
+  (begin_statement)
+  (switch_statement)
+] @indent.begin
 
 [
- (else_if_clause)
- (else_clause)
- "end"
-] @branch
+  "else" ; else and else if must both start the line with "else", so tag the string directly
+  "case"
+  "end"
+] @indent.branch
 
-(comment) @ignore
+"end" @indent.end
+
+(comment) @indent.ignore

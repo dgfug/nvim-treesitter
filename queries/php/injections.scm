@@ -1,3 +1,5 @@
-(text) @html
+; inherits: php_only
 
-(comment) @comment
+((text) @injection.content
+  (#set! injection.language "html")
+  (#set! injection.combined))

@@ -1,6 +1,16 @@
 (identifier) @type
-(keyword) @keyword
+
+[
+  "strict"
+  "graph"
+  "digraph"
+  "subgraph"
+  "node"
+  "edge"
+] @keyword
+
 (string_literal) @string
+
 (number_literal) @number
 
 [
@@ -24,22 +34,16 @@
 
 (subgraph
   id: (id
-    (identifier) @namespace)
-)
+    (identifier) @module))
 
 (attribute
   name: (id
-    (identifier) @field)
-)
+    (identifier) @variable.member))
 
 (attribute
   value: (id
-    (identifier) @constant)
-)
+    (identifier) @constant))
 
-[
-(comment)
-(preproc)
-] @comment
+(comment) @comment @spell
 
-(ERROR) @error
+(preproc) @keyword.directive

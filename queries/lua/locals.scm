@@ -1,51 +1,54 @@
-;;; DECLARATIONS AND SCOPES
-
-;; Variable and field declarations
-((variable_declarator
-   (identifier) @definition.var))
-
-((variable_declarator
-   (field_expression . (_) @definition.associated (property_identifier) @definition.var)))
-
-;; Parameters
-(parameters (identifier) @definition.parameter)
-
-;; Loops
-((loop_expression
-   (identifier) @definition.var))
-
-;; Function definitions
-((function
-   (function_name
-     (function_name_field
-       (identifier) @definition.associated . (property_identifier) @definition.method)))
- (#set! definition.method.scope "parent"))
-
-((function
-   (function_name (identifier) @definition.function))
- (#set! definition.function.scope "parent"))
-
-((local_function (identifier) @definition.function)
- (#set! definition.function.scope "parent"))
-
-(local_variable_declaration
-  (variable_declarator (identifier) @definition.function) . (function_definition))
-
-;; Scopes
+; Scopes
 [
-  (program)
-  (function)
-  (local_function)
-  (function_definition)
-  (if_statement)
-  (for_in_statement)
-  (repeat_statement)
-  (while_statement)
+  (chunk)
   (do_statement)
-] @scope
+  (while_statement)
+  (repeat_statement)
+  (if_statement)
+  (for_statement)
+  (function_declaration)
+  (function_definition)
+] @local.scope
 
-;;; REFERENCES
-[
-  (identifier)
-  (property_identifier)
-] @reference
+; Definitions
+(assignment_statement
+  (variable_list
+    (identifier) @local.definition.var))
+
+(assignment_statement
+  (variable_list
+    (dot_index_expression
+      .
+      (_) @local.definition.associated
+      (identifier) @local.definition.var)))
+
+((function_declaration
+  name: (identifier) @local.definition.function)
+  (#set! definition.function.scope "parent"))
+
+((function_declaration
+  name: (dot_index_expression
+    .
+    (_) @local.definition.associated
+    (identifier) @local.definition.function))
+  (#set! definition.method.scope "parent"))
+
+((function_declaration
+  name: (method_index_expression
+    .
+    (_) @local.definition.associated
+    (identifier) @local.definition.method))
+  (#set! definition.method.scope "parent"))
+
+(for_generic_clause
+  (variable_list
+    (identifier) @local.definition.var))
+
+(for_numeric_clause
+  name: (identifier) @local.definition.var)
+
+(parameters
+  (identifier) @local.definition.parameter)
+
+; References
+(identifier) @local.reference

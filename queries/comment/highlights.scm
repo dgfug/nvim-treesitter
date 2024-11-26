@@ -1,25 +1,49 @@
-[
- "("
- ")"
-] @punctuation.bracket
+((tag
+  (name) @comment.todo @nospell
+  ("(" @punctuation.bracket
+    (user) @constant
+    ")" @punctuation.bracket)?
+  ":" @punctuation.delimiter)
+  (#any-of? @comment.todo "TODO" "WIP"))
 
-":" @punctuation.delimiter
+("text" @comment.todo @nospell
+  (#any-of? @comment.todo "TODO" "WIP"))
 
-(tag (name) @text.note (user)? @constant)
+((tag
+  (name) @comment.note @nospell
+  ("(" @punctuation.bracket
+    (user) @constant
+    ")" @punctuation.bracket)?
+  ":" @punctuation.delimiter)
+  (#any-of? @comment.note "NOTE" "XXX" "INFO" "DOCS" "PERF" "TEST"))
 
-((tag ((name) @text.warning))
- (#any-of? @text.warning "TODO" "HACK" "WARNING"))
+("text" @comment.note @nospell
+  (#any-of? @comment.note "NOTE" "XXX" "INFO" "DOCS" "PERF" "TEST"))
 
-("text" @text.warning
- (#any-of? @text.warning "TODO" "HACK" "WARNING"))
+((tag
+  (name) @comment.warning @nospell
+  ("(" @punctuation.bracket
+    (user) @constant
+    ")" @punctuation.bracket)?
+  ":" @punctuation.delimiter)
+  (#any-of? @comment.warning "HACK" "WARNING" "WARN" "FIX"))
 
-((tag ((name) @text.danger))
- (#any-of? @text.danger "FIXME" "XXX" "BUG"))
+("text" @comment.warning @nospell
+  (#any-of? @comment.warning "HACK" "WARNING" "WARN" "FIX"))
 
-("text" @text.danger
- (#any-of? @text.danger "FIXME" "XXX" "BUG"))
+((tag
+  (name) @comment.error @nospell
+  ("(" @punctuation.bracket
+    (user) @constant
+    ")" @punctuation.bracket)?
+  ":" @punctuation.delimiter)
+  (#any-of? @comment.error "FIXME" "BUG" "ERROR"))
+
+("text" @comment.error @nospell
+  (#any-of? @comment.error "FIXME" "BUG" "ERROR"))
 
 ; Issue number (#123)
-("text" @number (#match? @number "^#[0-9]+$"))
-; User mention (@user)
-("text" @constant (#match? @constant "^[@][a-zA-Z0-9_-]+$"))
+("text" @number
+  (#lua-match? @number "^#[0-9]+$"))
+
+(uri) @string.special.url @nospell

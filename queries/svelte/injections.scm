@@ -1,28 +1,47 @@
 ; inherits: html_tags
 
-(
-  (style_element
-    (start_tag
-      (attribute
-        (quoted_attribute_value (attribute_value) @_lang)))
-    (raw_text) @scss)
+((style_element
+  (start_tag
+    (attribute
+      (attribute_name) @_attr
+      (quoted_attribute_value
+        (attribute_value) @_lang)))
+  (raw_text) @injection.content)
+  (#eq? @_attr "lang")
   (#any-of? @_lang "scss" "postcss" "less")
-)
+  (#set! injection.language "scss"))
 
-((attribute
-   (attribute_name) @_attr
-   (quoted_attribute_value (attribute_value) @css))
- (#eq? @_attr "style"))
+((svelte_raw_text) @injection.content
+  (#set! injection.language "javascript"))
 
-(raw_text_expr) @javascript
-
-(
-  (script_element
-    (start_tag
-      (attribute
-        (quoted_attribute_value (attribute_value) @_lang)))
-    (raw_text) @typescript)
+((script_element
+  (start_tag
+    (attribute
+      (attribute_name) @_attr
+      (quoted_attribute_value
+        (attribute_value) @_lang)))
+  (raw_text) @injection.content)
+  (#eq? @_attr "lang")
   (#any-of? @_lang "ts" "typescript")
-)
+  (#set! injection.language "typescript"))
 
-(comment) @comment
+((script_element
+  (start_tag
+    (attribute
+      (attribute_name) @_attr
+      (quoted_attribute_value
+        (attribute_value) @_lang)))
+  (raw_text) @injection.content)
+  (#eq? @_attr "lang")
+  (#any-of? @_lang "js" "javascript")
+  (#set! injection.language "javascript"))
+
+((element
+  (start_tag
+    (attribute
+      (attribute_name) @_attr
+      (quoted_attribute_value
+        (attribute_value) @injection.language)))
+  (text) @injection.content)
+  (#eq? @_attr "lang")
+  (#eq? @injection.language "pug"))

@@ -1,11 +1,22 @@
 ; locals.scm
+(function_definition) @local.scope
 
-(function_definition) @scope
+(argument
+  name: (identifier) @local.definition)
 
-(formal_parameters (identifier) @definition.parameter)
+(parameter
+  name: (identifier) @local.definition)
 
-(left_assignment name: (identifier) @definition)
-(equals_assignment name: (identifier) @definition)
-(right_assignment name: (identifier) @definition)
+(binary_operator
+  lhs: (identifier) @local.definition
+  operator: "<-")
 
-(identifier) @reference
+(binary_operator
+  lhs: (identifier) @local.definition
+  operator: "=")
+
+(binary_operator
+  operator: "->"
+  rhs: (identifier) @local.definition)
+
+(identifier) @local.reference

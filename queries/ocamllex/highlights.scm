@@ -1,29 +1,70 @@
-
-[(lexer_argument) (regexp_name) (any)] @type
-
-(lexer_entry_name) @function
-
-["as" "let" "and" "parse" "rule"] @keyword
-
-[(eof) (character)] @character
-(string) @string
-
+; Allow OCaml highlighter
 (ocaml) @none
 
-(character_range "-" @operator)
-(character_set "^" @operator)
-(regexp_alternative ["|"] @operator)
-(regexp_difference ["#"] @operator)
-(regexp_option ["?"] @operator)
-(regexp_repetition ["*"] @operator)
-(regexp_strict_repetition ["+"] @operator)
+; Regular expressions
+(regexp_name) @variable
 
-(action ["{" "}"] @punctuation.special)
-(character_set ["[" "]"] @punctuation.bracket)
-(parenthesized_regexp ["(" ")"] @punctuation.bracket)
+[
+  (eof)
+  (any)
+] @constant
 
-["="] @punctuation.delimiter
-(lexer_entry "|" @punctuation.delimiter)
+(character) @character
 
-(comment) @comment
-(ERROR) @error
+(string) @string
+
+(escape_sequence) @string.escape
+
+(character_set
+  "^" @punctuation.special)
+
+(character_range
+  "-" @punctuation.delimiter)
+
+(regexp_difference
+  "#" @operator)
+
+(regexp_repetition
+  [
+    "?"
+    "*"
+    "+"
+  ] @operator)
+
+(regexp_alternative
+  "|" @operator)
+
+; Rules
+(lexer_entry_name) @function
+
+(lexer_argument) @variable.parameter
+
+(lexer_entry
+  [
+    "="
+    "|"
+  ] @punctuation.delimiter)
+
+; keywords
+[
+  "and"
+  "as"
+  "let"
+  "parse"
+  "refill"
+  "rule"
+  "shortest"
+] @keyword
+
+; Punctuation
+[
+  "["
+  "]"
+  "("
+  ")"
+  "{"
+  "}"
+] @punctuation.bracket
+
+; Misc
+(comment) @comment @spell

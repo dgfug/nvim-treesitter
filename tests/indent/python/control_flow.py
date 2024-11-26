@@ -20,3 +20,16 @@ except:
     pass
 finally:
     pass
+
+while (a > 4 and
+       b > 5):
+    pass
+
+try:
+
+def foo():
+    print('indentme')
+
+    # comment
+    if True:
+        pass

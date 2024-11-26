@@ -1,10 +1,11 @@
 [
- (statement)
- (blank_node_property_list)
- (collection)
-] @indent
+  (directive)
+  (triple)
+  (blank_node_property_list)
+  (collection)
+] @indent.begin
+
 [
   "]"
   ")"
-] @branch
-
+] @indent.branch

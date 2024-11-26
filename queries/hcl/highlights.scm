@@ -1,5 +1,4 @@
 ; highlights.scm
-
 [
   "!"
   "\*"
@@ -48,23 +47,23 @@
   "for"
   "endfor"
   "in"
-] @repeat
+] @keyword.repeat
 
-[ 
+[
   "if"
   "else"
   "endif"
-] @conditional
+] @keyword.conditional
 
 [
   (quoted_template_start) ; "
-  (quoted_template_end); "
+  (quoted_template_end) ; "
   (template_literal) ; non-interpolation/directive content
 ] @string
 
 [
-  (heredoc_identifier) ; <<END
-  (heredoc_start) ; END
+  (heredoc_identifier) ; END
+  (heredoc_start) ; << or <<-
 ] @punctuation.delimiter
 
 [
@@ -76,27 +75,44 @@
 ] @punctuation.special
 
 (numeric_lit) @number
+
 (bool_lit) @boolean
+
 (null_lit) @constant
-(comment) @comment
+
+(comment) @comment @spell
+
 (identifier) @variable
 
-(block (identifier) @type)
-(function_call (identifier) @function)
-(attribute (identifier) @field)
+(body
+  (block
+    (identifier) @keyword))
+
+(body
+  (block
+    (body
+      (block
+        (identifier) @type))))
+
+(function_call
+  (identifier) @function)
+
+(attribute
+  (identifier) @variable.member)
 
 ; { key: val }
 ;
 ; highlight identifier keys as though they were block attributes
-(object_elem key: (expression (variable_expr (identifier) @field)))
+(object_elem
+  key: (expression
+    (variable_expr
+      (identifier) @variable.member)))
 
-((identifier) @keyword (#any-of? @keyword "module" "root" "cwd" "resource" "variable" "data" "locals" "terraform" "provider" "output"))
-((identifier) @type.builtin (#any-of? @type.builtin "bool" "string" "number" "object" "tuple" "list" "map" "set" "any"))
-(variable_expr (identifier) @variable.builtin (#any-of? @variable.builtin "var" "local" "path"))
-(get_attr (identifier) @variable.builtin (#any-of? @variable.builtin  "root" "cwd" "module"))
-
-(object_elem val: (expression
+; var.foo, data.bar
+;
+; first element in get_attr is a variable.builtin or a reference to a variable.builtin
+(expression
   (variable_expr
-    (identifier) @type.builtin (#any-of? @type.builtin "bool" "string" "number" "object" "tuple" "list" "map" "set" "any"))))
-
-(ERROR) @error
+    (identifier) @variable.builtin)
+  (get_attr
+    (identifier) @variable.member))

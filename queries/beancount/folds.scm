@@ -1,4 +1,4 @@
 [
-    (transaction)
-    (heading)
+  (transaction)
+  (section)
 ] @fold

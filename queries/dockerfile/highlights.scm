@@ -26,7 +26,7 @@
   "@"
 ] @operator
 
-(comment) @comment
+(comment) @comment @spell
 
 (image_spec
   (image_tag
@@ -36,15 +36,33 @@
 
 (double_quoted_string) @string
 
+[
+  (heredoc_marker)
+  (heredoc_end)
+] @label
+
+((heredoc_block
+  (heredoc_line) @string)
+  (#set! priority 90))
+
 (expansion
   [
     "$"
     "{"
     "}"
-  ] @punctuation.special
-)
+  ] @punctuation.special)
 
 ((variable) @constant
-  (#match? @constant "^[A-Z][A-Z_0-9]*$"))
+  (#lua-match? @constant "^[A-Z][A-Z_0-9]*$"))
 
+(arg_instruction
+  .
+  (unquoted_string) @property)
 
+(env_instruction
+  (env_pair
+    .
+    (unquoted_string) @property))
+
+(expose_instruction
+  (expose_port) @number)

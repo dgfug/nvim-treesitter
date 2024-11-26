@@ -1,5 +1,28 @@
 local query = require "vim.treesitter.query"
 
+local html_script_type_languages = {
+  ["importmap"] = "json",
+  ["module"] = "javascript",
+  ["application/ecmascript"] = "javascript",
+  ["text/ecmascript"] = "javascript",
+}
+
+local non_filetype_match_injection_language_aliases = {
+  ex = "elixir",
+  pl = "perl",
+  sh = "bash",
+  uxn = "uxntal",
+  ts = "typescript",
+}
+
+-- compatibility shim for breaking change on nightly/0.11
+local opts = vim.fn.has "nvim-0.10" == 1 and { force = true, all = false } or true
+
+local function get_parser_from_markdown_info_string(injection_alias)
+  local match = vim.filetype.match { filename = "a." .. injection_alias }
+  return match or non_filetype_match_injection_language_aliases[injection_alias] or injection_alias
+end
+
 local function error(str)
   vim.api.nvim_err_writeln(str)
 end
@@ -20,52 +43,31 @@ local function valid_args(name, pred, count, strict_count)
   return true
 end
 
-query.add_predicate("nth?", function(match, pattern, bufnr, pred)
+---@param match (TSNode|nil)[]
+---@param _pattern string
+---@param _bufnr integer
+---@param pred string[]
+---@return boolean|nil
+query.add_predicate("nth?", function(match, _pattern, _bufnr, pred)
   if not valid_args("nth?", pred, 2, true) then
     return
   end
 
-  local node = match[pred[2]]
+  local node = match[pred[2]] ---@type TSNode
   local n = tonumber(pred[3])
   if node and node:parent() and node:parent():named_child_count() > n then
     return node:parent():named_child(n) == node
   end
 
   return false
-end)
+end, opts)
 
-local function has_ancestor(match, pattern, bufnr, pred)
-  if not valid_args(pred[1], pred, 2) then
-    return
-  end
-
-  local node = match[pred[2]]
-  local ancestor_types = { unpack(pred, 3) }
-  if not node then
-    return true
-  end
-
-  local just_direct_parent = pred[1]:find("has-parent", 1, true)
-
-  node = node:parent()
-  while node do
-    if vim.tbl_contains(ancestor_types, node:type()) then
-      return true
-    end
-    if just_direct_parent then
-      node = nil
-    else
-      node = node:parent()
-    end
-  end
-  return false
-end
-
-query.add_predicate("has-ancestor?", has_ancestor)
-
-query.add_predicate("has-parent?", has_ancestor)
-
-query.add_predicate("is?", function(match, pattern, bufnr, pred)
+---@param match (TSNode|nil)[]
+---@param _pattern string
+---@param bufnr integer
+---@param pred string[]
+---@return boolean|nil
+query.add_predicate("is?", function(match, _pattern, bufnr, pred)
   if not valid_args("is?", pred, 2) then
     return
   end
@@ -82,9 +84,14 @@ query.add_predicate("is?", function(match, pattern, bufnr, pred)
   local _, _, kind = locals.find_definition(node, bufnr)
 
   return vim.tbl_contains(types, kind)
-end)
+end, opts)
 
-query.add_predicate("has-type?", function(match, pattern, bufnr, pred)
+---@param match (TSNode|nil)[]
+---@param _pattern string
+---@param _bufnr integer
+---@param pred string[]
+---@return boolean|nil
+query.add_predicate("kind-eq?", function(match, _pattern, _bufnr, pred)
   if not valid_args(pred[1], pred, 2) then
     return
   end
@@ -97,34 +104,64 @@ query.add_predicate("has-type?", function(match, pattern, bufnr, pred)
   end
 
   return vim.tbl_contains(types, node:type())
-end)
+end, opts)
 
--- Just avoid some anoying warnings for this directive
-query.add_directive("make-range!", function() end)
+---@param match (TSNode|nil)[]
+---@param _ string
+---@param bufnr integer
+---@param pred string[]
+---@return boolean|nil
+query.add_directive("set-lang-from-mimetype!", function(match, _, bufnr, pred, metadata)
+  local capture_id = pred[2]
+  local node = match[capture_id]
+  if not node then
+    return
+  end
+  local type_attr_value = vim.treesitter.get_node_text(node, bufnr)
+  local configured = html_script_type_languages[type_attr_value]
+  if configured then
+    metadata["injection.language"] = configured
+  else
+    local parts = vim.split(type_attr_value, "/", {})
+    metadata["injection.language"] = parts[#parts]
+  end
+end, opts)
 
+---@param match (TSNode|nil)[]
+---@param _ string
+---@param bufnr integer
+---@param pred string[]
+---@return boolean|nil
+query.add_directive("set-lang-from-info-string!", function(match, _, bufnr, pred, metadata)
+  local capture_id = pred[2]
+  local node = match[capture_id]
+  if not node then
+    return
+  end
+  local injection_alias = vim.treesitter.get_node_text(node, bufnr):lower()
+  metadata["injection.language"] = get_parser_from_markdown_info_string(injection_alias)
+end, opts)
+
+-- Just avoid some annoying warnings for this directive
+query.add_directive("make-range!", function() end, opts)
+
+--- transform node text to lower case (e.g., to make @injection.language case insensitive)
+---
+---@param match (TSNode|nil)[]
+---@param _ string
+---@param bufnr integer
+---@param pred string[]
+---@return boolean|nil
 query.add_directive("downcase!", function(match, _, bufnr, pred, metadata)
-  local text, key, value
-
-  if #pred == 3 then
-    -- (#downcase! @capture "key")
-    key = pred[3]
-    value = metadata[pred[2]][key]
-  else
-    -- (#downcase! "key")
-    key = pred[2]
-    value = metadata[key]
+  local id = pred[2]
+  local node = match[id]
+  if not node then
+    return
   end
 
-  if type(value) == "string" then
-    text = value
-  else
-    local node = match[value]
-    text = query.get_node_text(node, bufnr) or ""
+  local text = vim.treesitter.get_node_text(node, bufnr, { metadata = metadata[id] }) or ""
+  if not metadata[id] then
+    metadata[id] = {}
   end
-
-  if #pred == 3 then
-    metadata[pred[2]][key] = string.lower(text)
-  else
-    metadata[key] = string.lower(text)
-  end
-end)
+  metadata[id].text = string.lower(text)
+end, opts)

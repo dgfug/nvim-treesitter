@@ -1,17 +1,24 @@
 [
+  (parameters)
+  (template_parameters)
+  (expression_statement)
+  (aggregate_body)
+  (function_body)
+  (scope_statement)
   (block_statement)
   (case_statement)
-  (token_string)
-] @indent
+] @indent.begin
+
+(comment) @indent.auto
 
 [
-  "(" ")"
-  "{" "}"
-  "[" "]"
-] @branch
+  (case)
+  (default)
+  "}"
+  "]"
+] @indent.branch
 
 [
-  (line_comment)
-  (block_comment)
-  (nesting_block_comment)
-] @ignore
+  (directive)
+  (shebang)
+] @indent.zero

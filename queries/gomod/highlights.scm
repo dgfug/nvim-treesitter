@@ -2,6 +2,7 @@
   "require"
   "replace"
   "go"
+  "toolchain"
   "exclude"
   "retract"
   "module"
@@ -9,9 +10,11 @@
 
 "=>" @operator
 
-(comment) @comment
+(comment) @comment @spell
+
+(module_path) @string.special.url
 
 [
-(version)
-(go_version)
+  (version)
+  (go_version)
 ] @string

@@ -1,90 +1,107 @@
 [
- "@media"
- "@import"
- "@charset"
- "@namespace"
- "@supports"
- "@keyframes"
- (at_keyword)
- (to)
- (from)
- (important)
- ] @keyword
+  "@media"
+  "@charset"
+  "@namespace"
+  "@supports"
+  "@keyframes"
+  (at_keyword)
+] @keyword.directive
 
-(comment) @comment
+"@import" @keyword.import
 
 [
- (tag_name)
- (nesting_selector)
- (universal_selector)
- ] @type
+  (to)
+  (from)
+] @keyword
+
+(comment) @comment @spell
+
+(tag_name) @tag
+
+(class_name) @type
+
+(id_name) @constant
+
+[
+  (property_name)
+  (feature_name)
+] @property
+
+[
+  (nesting_selector)
+  (universal_selector)
+] @character.special
 
 (function_name) @function
 
 [
- "~"
- ">"
- "+"
- "-"
- "*"
- "/"
- "="
- "^="
- "|="
- "~="
- "$="
- "*="
- "and"
- "or"
- "not"
- "only"
- ] @operator
-
-
-(attribute_selector (plain_value) @string)
-(pseudo_element_selector (tag_name) @property)
-(pseudo_class_selector (class_name) @property)
+  "~"
+  ">"
+  "+"
+  "-"
+  "*"
+  "/"
+  "="
+  "^="
+  "|="
+  "~="
+  "$="
+  "*="
+] @operator
 
 [
- (class_name)
- (id_name)
- (namespace_name)
- (property_name)
- (feature_name)
- (attribute_name)
- ] @property
+  "and"
+  "or"
+  "not"
+  "only"
+] @keyword.operator
 
+(important) @keyword.modifier
 
-((property_name) @type
-                 (#match? @type "^--"))
-((plain_value) @type
-               (#match? @type "^--"))
+(attribute_selector
+  (plain_value) @string)
 
-[
- (string_value)
- (color_value)
- (unit)
- ] @string
+(pseudo_element_selector
+  "::"
+  (tag_name) @attribute)
 
-[
- (integer_value)
- (float_value)
- ] @number
+(pseudo_class_selector
+  (class_name) @attribute)
 
-[
- "#"
- ","
- "."
- ":"
- "::"
- ";"
- ] @punctuation.delimiter
+(attribute_name) @tag.attribute
+
+(namespace_name) @module
+
+((property_name) @variable
+  (#lua-match? @variable "^[-][-]"))
+
+((plain_value) @variable
+  (#lua-match? @variable "^[-][-]"))
 
 [
- "{"
- ")"
- "("
- "}"
- ] @punctuation.bracket
+  (string_value)
+  (color_value)
+  (unit)
+] @string
 
-(ERROR) @error
+(integer_value) @number
+
+(float_value) @number.float
+
+[
+  "#"
+  ","
+  "."
+  ":"
+  "::"
+  ";"
+] @punctuation.delimiter
+
+[
+  "{"
+  ")"
+  "("
+  "}"
+  "["
+  "]"
+] @punctuation.bracket

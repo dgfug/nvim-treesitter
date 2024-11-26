@@ -4,10 +4,10 @@
 
 [
   "_:"
-  "<" 
-  ">" 
+  "<"
+  ">"
   (namespace)
-] @namespace
+] @module
 
 [
   (iri_reference)
@@ -23,7 +23,7 @@
 [
   (decimal)
   (double)
-] @float
+] @number.float
 
 (boolean_literal) @boolean
 
@@ -48,11 +48,15 @@
   (anon)
 ] @punctuation.bracket
 
-(comment) @comment
+(comment) @comment @spell
 
 (echar) @string.escape
 
-
-(rdf_literal 
+(rdf_literal
   "^^" @type
-	datatype: (_ ["<" ">" (namespace)] @type) @type)
+  datatype: (_
+    [
+      "<"
+      ">"
+      (namespace)
+    ] @type) @type)

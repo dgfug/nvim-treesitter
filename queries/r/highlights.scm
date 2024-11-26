@@ -1,88 +1,148 @@
-; highlights.scm
-
-(call function: (identifier) @function)
-(namespace_get function: (identifier) @method)
-(namespace_get_internal function: (identifier) @method)
-
 ; Literals
-
 (integer) @number
 
-(float) @number
+(float) @number.float
 
 (complex) @number
 
 (string) @string
 
-(comment) @comment
+(string
+  (string_content
+    (escape_sequence) @string.escape))
 
-(formal_parameters (identifier) @parameter)
+; Comments
+(comment) @comment @spell
 
-(identifier) @variable
+((program
+  .
+  (comment) @keyword.directive @nospell)
+  (#lua-match? @keyword.directive "^#!/"))
 
 ; Operators
 [
- "="
- "<-"
- "<<-"
- "->"
-] @operator
-
-(unary operator: [
-  "-"
-  "+"
-  "!"
+  "?"
+  ":="
+  "="
+  "<-"
+  "<<-"
+  "->"
+  "->>"
   "~"
-] @operator)
-
-(binary operator: [
-  "-"
-  "+"
-  "*"
-  "/"
-  "^"
-  "<"
-  ">"
-  "<="
-  ">="
-  "=="
-  "!="
+  "|>"
   "||"
   "|"
   "&&"
   "&"
+  "<"
+  "<="
+  ">"
+  ">="
+  "=="
+  "!="
+  "+"
+  "-"
+  "*"
+  "/"
+  "::"
+  ":::"
+  "**"
+  "^"
+  "$"
+  "@"
   ":"
-  "~"
-] @operator)
+  "!"
+  "special"
+] @operator
 
-(special) @operator
-
+; Punctuation
 [
- "("
- ")"
- "["
- "]"
- "{"
- "}"
+  "("
+  ")"
+  "{"
+  "}"
+  "["
+  "]"
+  "[["
+  "]]"
 ] @punctuation.bracket
 
+(comma) @punctuation.delimiter
+
+; Variables
+(identifier) @variable
+
+; Functions
+(binary_operator
+  lhs: (identifier) @function
+  operator: "<-"
+  rhs: (function_definition))
+
+(binary_operator
+  lhs: (identifier) @function
+  operator: "="
+  rhs: (function_definition))
+
+; Calls
+(call
+  function: (identifier) @function.call)
+
+(extract_operator
+  rhs: (identifier) @variable.member)
+
+function: (extract_operator
+  rhs: (identifier) @function.method.call)
+
+; Parameters
+(parameters
+  (parameter
+    name: (identifier) @variable.parameter))
+
+(arguments
+  (argument
+    name: (identifier) @variable.parameter))
+
+; Namespace
+(namespace_operator
+  lhs: (identifier) @module)
+
+(call
+  function: (namespace_operator
+    rhs: (identifier) @function))
+
+; Keywords
+(function_definition
+  name: "function" @keyword.function)
+
+(function_definition
+  name: "\\" @operator)
+
+(return) @keyword.return
+
 [
- "while"
- "if"
- "else"
- "repeat"
- "for"
- "in"
- (dots)
- (true)
- (false)
- (break)
- (next)
- (inf)
- (nan)
- (na)
- (null)
-] @keyword
+  "if"
+  "else"
+] @keyword.conditional
 
+[
+  "while"
+  "repeat"
+  "for"
+  "in"
+  (break)
+  (next)
+] @keyword.repeat
 
-"function" @keyword.function
+[
+  (true)
+  (false)
+] @boolean
+
+[
+  (null)
+  (inf)
+  (nan)
+  (na)
+  (dots)
+  (dot_dot_i)
+] @constant.builtin

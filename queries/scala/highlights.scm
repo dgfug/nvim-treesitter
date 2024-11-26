@@ -1,174 +1,248 @@
 ; CREDITS @stumash (stuart.mashaal@gmail.com)
+(class_definition
+  name: (identifier) @type)
 
-;; variables
+(enum_definition
+  name: (identifier) @type)
 
-(identifier) @variable
+(object_definition
+  name: (identifier) @type)
 
-((identifier) @variable.builtin
- (#match? @variable.builtin "^this$"))
+(trait_definition
+  name: (identifier) @type)
 
-(interpolation) @none
+(full_enum_case
+  name: (identifier) @type)
 
-; Assume other uppercase names constants.
-; NOTE: In order to distinguish constants we highlight
-; all the identifiers that are uppercased. But this solution
-; is not suitable for all occurences e.g. it will highlight
-; an uppercased method as a constant if used with no params.
-; Introducing highlightning for those specific cases, is probably
-; best way to resolve the issue.
-((identifier) @constant (#match? @constant "^[A-Z]"))
+(simple_enum_case
+  name: (identifier) @type)
 
-;; types
+; variables
+(class_parameter
+  name: (identifier) @variable.parameter)
+
+(self_type
+  (identifier) @variable.parameter)
+
+(interpolation
+  (identifier) @none)
+
+(interpolation
+  (block) @none)
+
+; types
+(type_definition
+  name: (type_identifier) @type.definition)
 
 (type_identifier) @type
 
-(class_definition
-  name: (identifier) @type)
+; val/var definitions/declarations
+(val_definition
+  pattern: (identifier) @variable)
 
-(object_definition
-  name: (identifier) @type)
+(var_definition
+  pattern: (identifier) @variable)
 
-(trait_definition
-  name: (identifier) @type)
+(val_declaration
+  name: (identifier) @variable)
 
-(type_definition
-  name: (type_identifier) @type)
+(var_declaration
+  name: (identifier) @variable)
 
 ; method definition
+(function_declaration
+  name: (identifier) @function.method)
 
-(class_definition
-  body: (template_body
-    (function_definition
-      name: (identifier) @method)))
-(object_definition
-  body: (template_body
-    (function_definition
-      name: (identifier) @method)))
-(trait_definition
-  body: (template_body
-    (function_definition
-      name: (identifier) @method)))
+(function_definition
+  name: (identifier) @function.method)
 
-; imports
-
+; imports/exports
 (import_declaration
-  path: (identifier) @namespace)
-((stable_identifier (identifier) @namespace))
+  path: (identifier) @module)
+
+(stable_identifier
+  (identifier) @module)
 
 ((import_declaration
-  path: (identifier) @type) (#match? @type "^[A-Z]"))
-((stable_identifier (identifier) @type) (#match? @type "^[A-Z]"))
+  path: (identifier) @type)
+  (#lua-match? @type "^[A-Z]"))
 
-((import_selectors (identifier) @type) (#match? @type "^[A-Z]"))
+((stable_identifier
+  (identifier) @type)
+  (#lua-match? @type "^[A-Z]"))
+
+(export_declaration
+  path: (identifier) @module)
+
+(stable_identifier
+  (identifier) @module)
+
+((export_declaration
+  path: (identifier) @type)
+  (#lua-match? @type "^[A-Z]"))
+
+((stable_identifier
+  (identifier) @type)
+  (#lua-match? @type "^[A-Z]"))
+
+((namespace_selectors
+  (identifier) @type)
+  (#lua-match? @type "^[A-Z]"))
 
 ; method invocation
-
+(call_expression
+  function: (identifier) @function.call)
 
 (call_expression
-  function: (identifier) @function)
+  function: (operator_identifier) @function.call)
 
 (call_expression
   function: (field_expression
-    field: (identifier) @method))
+    field: (identifier) @function.method.call))
 
 ((call_expression
-   function: (identifier) @constructor)
- (#match? @constructor "^[A-Z]"))
+  function: (identifier) @constructor)
+  (#lua-match? @constructor "^[A-Z]"))
 
 (generic_function
-  function: (identifier) @function)
+  function: (identifier) @function.call)
 
-(
-  (identifier) @function.builtin
-  (#match? @function.builtin "^super$")
-)
+(interpolated_string_expression
+  interpolator: (identifier) @function.call)
 
 ; function definitions
-
 (function_definition
   name: (identifier) @function)
 
 (parameter
-  name: (identifier) @parameter)
+  name: (identifier) @variable.parameter)
+
+(binding
+  name: (identifier) @variable.parameter)
+
+(lambda_expression
+  parameters: (identifier) @variable.parameter)
 
 ; expressions
+(field_expression
+  field: (identifier) @variable.member)
 
+(field_expression
+  value: (identifier) @type
+  (#lua-match? @type "^[A-Z]"))
 
-(field_expression field: (identifier) @property)
-(field_expression value: (identifier) @type
- (#match? @type "^[A-Z]"))
+(infix_expression
+  operator: (identifier) @operator)
 
-(infix_expression operator: (identifier) @operator)
-(infix_expression operator: (operator_identifier) @operator)
-(infix_type operator: (operator_identifier) @operator)
-(infix_type operator: (operator_identifier) @operator)
+(infix_expression
+  operator: (operator_identifier) @operator)
+
+(infix_type
+  operator: (operator_identifier) @operator)
+
+(infix_type
+  operator: (operator_identifier) @operator)
 
 ; literals
-
 (boolean_literal) @boolean
+
 (integer_literal) @number
-(floating_point_literal) @float
+
+(floating_point_literal) @number.float
 
 [
-(symbol_literal)
-(string)
-(character_literal)
-(interpolated_string_expression)
+  (string)
+  (interpolated_string_expression)
 ] @string
 
-(interpolation "$" @punctuation.special)
+(character_literal) @character
 
-;; keywords
+(interpolation
+  "$" @punctuation.special)
+
+; keywords
+(opaque_modifier) @keyword.modifier
+
+(infix_modifier) @keyword
+
+(transparent_modifier) @keyword.modifier
+
+(open_modifier) @keyword.modifier
 
 [
-  "abstract"
   "case"
-  "class"
   "extends"
-  "final"
+  "derives"
   "finally"
-;; `forSome` existential types not implemented yet
-  "implicit"
-  "lazy"
-;; `macro` not implemented yet
+  ; `forSome` existential types not implemented yet
+  ; `macro` not implemented yet
   "object"
   "override"
-  "package"
-  "private"
-  "protected"
-  "sealed"
-  "trait"
-  "type"
   "val"
   "var"
   "with"
+  "given"
+  "using"
+  "end"
+  "implicit"
+  "extension"
+  "with"
 ] @keyword
 
-(null_literal) @keyword
-(wildcard) @keyword
+[
+  "enum"
+  "class"
+  "trait"
+  "type"
+] @keyword.type
 
-;; special keywords
+[
+  "abstract"
+  "final"
+  "lazy"
+  "sealed"
+  "private"
+  "protected"
+] @keyword.modifier
 
+(inline_modifier) @keyword.modifier
+
+(null_literal) @constant.builtin
+
+(wildcard
+  "_") @character.special
+
+(namespace_wildcard
+  [
+    "*"
+    "_"
+  ] @character.special)
+
+(annotation) @attribute
+
+; special keywords
 "new" @keyword.operator
 
 [
   "else"
   "if"
   "match"
-] @conditional
+  "then"
+] @keyword.conditional
 
 [
- "("
- ")"
- "["
- "]"
- "{"
- "}"
-]  @punctuation.bracket
+  "("
+  ")"
+  "["
+  "]"
+  "{"
+  "}"
+] @punctuation.bracket
 
 [
- "."
- ","
+  "."
+  ","
+  ":"
 ] @punctuation.delimiter
 
 [
@@ -176,29 +250,62 @@
   "for"
   "while"
   "yield"
-] @repeat
+] @keyword.repeat
 
 "def" @keyword.function
 
 [
- "=>"
- "<-"
- "@"
+  "=>"
+  "?=>"
+  "="
+  "!"
+  "<-"
+  "@"
 ] @operator
 
-"import" @include
+[
+  "import"
+  "export"
+  "package"
+] @keyword.import
 
 [
   "try"
   "catch"
   "throw"
-] @exception
+] @keyword.exception
 
 "return" @keyword.return
 
-(comment) @comment
+[
+  (comment)
+  (block_comment)
+] @comment @spell
 
-;; `case` is a conditional keyword in case_block
+((block_comment) @comment.documentation
+  (#lua-match? @comment.documentation "^/[*][*][^*].*[*]/$"))
+
+; `case` is a conditional keyword in case_block
+(case_block
+  (case_clause
+    "case" @keyword.conditional))
 
 (case_block
-  (case_clause ("case") @conditional))
+  (case_clause
+    "=>" @punctuation.delimiter))
+
+(operator_identifier) @operator
+
+((identifier) @type
+  (#lua-match? @type "^[A-Z]"))
+
+((identifier) @variable.builtin
+  (#lua-match? @variable.builtin "^this$"))
+
+((identifier) @function.builtin
+  (#lua-match? @function.builtin "^super$"))
+
+; Scala CLI using directives
+(using_directive_key) @variable.parameter
+
+(using_directive_value) @string
